@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"github.com/buger/goterm"
 	"github.com/digitalocean/godo"
@@ -9,9 +8,12 @@ import (
 	"github.com/shiena/ansicolor"
 	"golang.org/x/crypto/ssh"
 	"io"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
+	"regexp"
 	"syscall"
 	"time"
 )
@@ -21,8 +23,32 @@ type interruptType struct{}
 func (interruptType) Error() string { return "" }
 var interrupt = &interruptType{}
 
+// Check if the connection is IPv6.
+func checkIfIpv6() bool {
+	reqError := func() bool {
+		println("Unable to determine if the connection is IPv6. Going to attempt to default to connecting to the droplet via IPv4.")
+		return false
+	}
+	resp, err := http.Get("https://api64.ipify.org")
+	if err != nil || resp.StatusCode != 200 {
+		return reqError()
+	}
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return reqError()
+	}
+	matched, err := regexp.Match("[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+", b)
+	if err != nil {
+		return reqError()
+	}
+	return !matched
+}
+
 // This function is used to create the disposable droplet/kill it.
 func handleDisposableDroplet(region, size, distro string) {
+	// Determine if we are on a IPv6 connection.
+	ipv6 := checkIfIpv6()
+
 	// Defines the droplet ID.
 	ID := uuid.New().String()
 
@@ -119,9 +145,15 @@ func handleDisposableDroplet(region, size, distro string) {
 		panic(err)
 	}
 
-	// TODO: Handle IPv6 only connections.
 	// Keep trying to connect via SSH until it works.
-	ipv4, _ := d.PublicIPv4()
+	var ip string
+	network := "tcp"
+	if ipv6 {
+		ip, _ = d.PublicIPv6()
+		network = "tcp6"
+	} else {
+		ip, _ = d.PublicIPv4()
+	}
 	print("Waiting for the droplet to accept SSH connections... ")
 	signer, err := ssh.NewSignerFromKey(config.PrivateKey)
 	if err != nil {
@@ -132,8 +164,7 @@ func handleDisposableDroplet(region, size, distro string) {
 	go func() {
 		// Wait for SSH to be ready.
 		for {
-			client, err = ssh.Dial("tcp", ipv4+":22", &ssh.ClientConfig{
-				Config:            ssh.Config{},
+			client, err = ssh.Dial(network, ip+":22", &ssh.ClientConfig{
 				User:              "root",
 				Auth:              []ssh.AuthMethod{ssh.PublicKeys(signer)},
 
@@ -167,12 +198,38 @@ func handleDisposableDroplet(region, size, distro string) {
 		}
 
 		// Request pseudo terminal.
-		// TODO: The terminal doesn't seem to pass in raw key events.
-		err = session.RequestPty("xterm", goterm.Height(), goterm.Width(), modes)
+		// TODO: The terminal doesn't handle some formatting right.
+		err = session.RequestPty("vt100", goterm.Height(), goterm.Width(), modes)
 		if err != nil {
 			errorChan <- err
 			return
 		}
+
+		// Loop handling the width/height.
+		go func() {
+			currentHeight := goterm.Height()
+			currentWidth := goterm.Width()
+			for dropletActionsActive {
+				// Get the width/height.
+				w := goterm.Width()
+				h := goterm.Height()
+
+				// Check if it's different.
+				if w != currentWidth || h != currentHeight {
+					// Set the new width/height.
+					currentWidth = w
+					currentHeight = h
+					err := session.WindowChange(h, w)
+					if err != nil {
+						errorChan <- err
+						return
+					}
+				}
+
+				// Sleep for 100ms.
+				time.Sleep(time.Millisecond * 100)
+			}
+		}()
 
 		// Start SSH shell.
 		err = session.Shell()
@@ -183,24 +240,37 @@ func handleDisposableDroplet(region, size, distro string) {
 
 		// Handle input.
 		go func() {
+			ob := make([]byte, 1)
 			for dropletActionsActive {
-				reader := bufio.NewReader(os.Stdin)
-				b, err := reader.ReadString('\n')
+				_, err := os.Stdin.Read(ob)
 				if err != nil {
 					errorChan <- err
 					return
 				}
-				_, err = fmt.Fprint(stdin, b)
+				_, err = stdin.Write(ob)
 				if err != nil {
 					errorChan <- err
 					return
 				}
 			}
 		}()
+
+		// Handle waiting for disconnect.
+		go func() {
+			// Wait for the session.
+			err := session.Wait()
+
+			// If this is a exit error, return nil since we don't care about old command errors.
+			if _, ok := err.(*ssh.ExitError); ok {
+				errorChan <- nil
+			}
+
+			// If not, return the error.
+			errorChan <- err
+		}()
 	}()
 
 	// Handle any new errors/the client closing.
-	// TODO: Handle connection being killed by remote server.
 	for {
 		err := <-errorChan
 		if err == interrupt {
