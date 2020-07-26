@@ -16,3 +16,7 @@
 
 # IDEA data.
 .idea/
+
+# Dist's
+cli-dist
+droplet-tools-dist

@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/crypto/ssh"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -47,7 +47,7 @@ func loadConfig() (string, bool) {
 		// There's not much we can do here except crash.
 		panic(err)
 	}
-	fp := path.Join(homedir, ".do-disposable")
+	fp := filepath.Join(homedir, ".do-disposable")
 	f, err := os.Open(fp)
 
 	// Handle file being existent/readable.

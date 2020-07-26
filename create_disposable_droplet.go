@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/JakeMakesStuff/do-disposable/copyserver"
 	"github.com/buger/goterm"
 	"github.com/digitalocean/godo"
 	"github.com/google/uuid"
@@ -179,8 +180,20 @@ func handleDisposableDroplet(region, size, distro string) {
 		}
 		println("done!")
 
-		// Get a session.
+		// Handle copyback/copyfrom init.
 		session, err := client.NewSession()
+		if err != nil {
+			errorChan <- err
+			return
+		}
+		err = session.Run("wget -O - -o /dev/null https://community-tools.sfo2.digitaloceanspaces.com/droplet_init.sh | bash")
+		if err != nil {
+			errorChan <- err
+			return
+		}
+
+		// Create a new session.
+		session, err = client.NewSession()
 		if err != nil {
 			errorChan <- err
 			return
@@ -196,6 +209,22 @@ func handleDisposableDroplet(region, size, distro string) {
 			ssh.ECHO:  0,
 			ssh.IGNCR: 1,
 		}
+
+		// Create a fasthttp server for the SSH server to be able to use.
+		go func() {
+			// Create the listener on the SSH side.
+			listener, err := client.Listen("tcp", "127.0.0.1:8190")
+			if err != nil {
+				errorChan <- err
+				return
+			}
+
+			// Create the server.
+			err = copyserver.Copyserver(listener)
+			if err != nil {
+				errorChan <- err
+			}
+		}()
 
 		// Request pseudo terminal.
 		// TODO: The terminal doesn't handle some formatting right.
