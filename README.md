@@ -16,7 +16,7 @@ You can find a binary for your operating system in the [releases page](https://g
 
 On first boot, you should be logged in to DigitalOcean and then run `do-disposable auth`. On the first boot, this will then walk through through the [authentication](#authentication), [set region](#set-region) and [set size](#set-size) configurations.
 
-From here, you can simply start the droplet with `do-disposable up` (see [starting the droplet](#starting-the-droplet)) for help with this.
+From here, you can simply start the droplet with `do-disposable up` (see [starting the droplet](#starting-the-droplet) for help with this).
 
 ## Authentication
 To change your SSH key/token after the first boot, you can run `do-disposable auth`. When you run this, you will be prompted for your DigitalOcean token:
