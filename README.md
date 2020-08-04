@@ -12,7 +12,7 @@ Additionally, when deploying the Droplet, the following commands are deployed to
 - `copyback <droplet file/folder path> [host save location]`: Allows you to copy a file/folder back from the Droplet.
 
 ## First Usage
-You can find a binary for your operating system in the [releases page](https://github.com/JakeMakesStuff/do-disposable/releases).
+You can find a binary for your operating system in the [releases page](https://github.com/do-community/do-disposable/releases).
 
 On first boot, you should be logged in to DigitalOcean and then run `do-disposable auth`. On the first boot, this will then walk through through the [authentication](#authentication), [set region](#set-region) and [set size](#set-size) configurations.
 

@@ -1,9 +1,6 @@
 ## Type of Change
 <!-- What part of the source are you modifying? -->
 
-## What OS are you on?
-<!-- Please place your operating systen here -->
-
 ## What issue does this relate to?
 <!-- Use a GitHub keyword ('resolves #xx', 'fixes #xx', 'closes #xx') to automatically close the relevant issue. -->
 

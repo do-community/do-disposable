@@ -1,4 +1,4 @@
-module github.com/JakeMakesStuff/do-disposable/copyfrom
+module github.com/do-community/do-disposable/copyfrom
 
 go 1.14
 

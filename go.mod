@@ -1,4 +1,4 @@
-module github.com/JakeMakesStuff/do-disposable
+module github.com/do-community/do-disposable
 
 go 1.14
 
