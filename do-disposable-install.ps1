@@ -30,6 +30,5 @@ Invoke-WebRequest -Uri $url -OutFile $binfolder\do-disposable.exe
 
 # Echo done and wait for input.
 echo "Install complete."
-
 Write-Host -NoNewLine "Press any key to continue..."
 cmd /c pause | out-null
