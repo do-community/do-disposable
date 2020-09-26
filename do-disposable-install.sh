@@ -17,11 +17,11 @@ fi
 
 unamestr=$(uname)
 if [ "$unamestr" = 'Linux' ]; then
-    sudo wget -O /usr/local/bin/do-disposable https://github.com/do-community/do-disposable/releases/download/v1.0.0/do-disposable_linux-$arch
+    sudo wget -O /usr/local/bin/do-disposable https://github.com/do-community/do-disposable/releases/download/v1.0.1/do-disposable_linux-$arch
 elif [ "$unamestr" = 'FreeBSD' ]; then
-    sudo wget -O /usr/local/bin/do-disposable https://github.com/do-community/do-disposable/releases/download/v1.0.0/do-disposable_freebsd-$arch
+    sudo wget -O /usr/local/bin/do-disposable https://github.com/do-community/do-disposable/releases/download/v1.0.1/do-disposable_freebsd-$arch
 elif [ "$unamestr" = 'Darwin' ]; then
-    sudo wget -O /usr/local/bin/do-disposable https://github.com/do-community/do-disposable/releases/download/v1.0.0/do-disposable_darwin-$arch
+    sudo wget -O /usr/local/bin/do-disposable https://github.com/do-community/do-disposable/releases/download/v1.0.1/do-disposable_darwin-$arch
 else
   echo "Unknown platform." 1>&2
   exit 1

@@ -25,7 +25,7 @@ if ($Env:PROCESSOR_ARCHITECTURE -eq "ARM64") {
         $processorType = "386"
     }
 }
-$url = "https://github.com/do-community/do-disposable/releases/download/v1.0.0/do-disposable_windows-$processorType.exe"
+$url = "https://github.com/do-community/do-disposable/releases/download/v1.0.1/do-disposable_windows-$processorType.exe"
 Invoke-WebRequest -Uri $url -OutFile $binfolder\do-disposable.exe
 
 # Echo done and wait for input.

@@ -5,6 +5,9 @@
 
 mkdir cli-dist
 
+cp do-disposable-install.ps1 cli-dist/do-disposable-install.ps1
+cp do-disposable-install.sh cli-dist/do-disposable-install.sh
+
 platforms=("windows/amd64" "windows/386" "windows/arm" "freebsd/amd64" "freebsd/386" "freebsd/arm" "linux/amd64" "linux/386" "linux/arm" "linux/arm64" "darwin/amd64")
 
 for platform in "${platforms[@]}"
