@@ -12,12 +12,7 @@
 // limitations under the License.
 package main
 
-import (
-	"bufio"
-	"os"
-	"strconv"
-	"strings"
-)
+import "strconv"
 
 // FormatList is used to format a list to be shown in the console and get the result. The default pointer will result to that if a blank string is entered by the user.
 func FormatList(Question string, Items []string, Default *string) string {
@@ -32,10 +27,7 @@ func FormatList(Question string, Items []string, Default *string) string {
 	Request += ": "
 	print(Output)
 	for {
-		print(Request)
-		reader := bufio.NewReader(os.Stdin)
-		text, _ := reader.ReadString('\n')
-		text = strings.Replace(text, "\n", "", -1)
+		text := GetInput(Request)
 		if text == "" {
 			if Default == nil {
 				continue

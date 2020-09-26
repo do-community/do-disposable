@@ -288,6 +288,10 @@ func handleDisposableDroplet(region, size, distro string) {
 					errorChan <- err
 					return
 				}
+				if ob[0] == '\r' {
+					// Windows.
+					continue
+				}
 				_, err = stdin.Write(ob)
 				if err != nil {
 					errorChan <- err

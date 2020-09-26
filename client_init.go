@@ -13,7 +13,6 @@
 package main
 
 import (
-	"bufio"
 	"crypto/rand"
 	"crypto/rsa"
 	"encoding/gob"
@@ -32,10 +31,7 @@ var client *godo.Client
 // Used to get the user to input their token.
 func setToken() string {
 	for {
-		print("What is your DigitalOcean token? You will need a read/write API key which you can generate from the \"API Keys\" panel when you are signed in with your DigitalOcean account: ")
-		reader := bufio.NewReader(os.Stdin)
-		text, _ := reader.ReadString('\n')
-		text = strings.Replace(text, "\n", "", -1)
+		text := GetInput("What is your DigitalOcean token? You will need a read/write API key which you can generate from the \"API Keys\" panel when you are signed in with your DigitalOcean account: ")
 		if text == "" {
 			continue
 		}
